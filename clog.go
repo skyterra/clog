@@ -15,6 +15,8 @@ const (
 	ERROR = "ERROR"
 )
 
+var globalOpts []func(ctx context.Context) string
+
 type Clog struct {
 	ins      *log.Logger
 	optional []func(ctx context.Context) string
@@ -37,18 +39,22 @@ func (cl *Clog) Error(ctx context.Context, format string, v ...any) {
 }
 
 func (cl *Clog) output(ctx context.Context, level string, format string, v ...any) {
-	var prefix []string
+	var prefix = []string{level}
 	for _, opt := range cl.optional {
 		prefix = append(prefix, opt(ctx))
 	}
-	prefix = append(prefix, level)
+
 	content := fmt.Sprintf(format, v...)
-	cl.ins.Output(2, fmt.Sprintf("|%s| %s", strings.Join(prefix, "|"), content))
+	cl.ins.Output(2, fmt.Sprintf("|%s|$ %s", strings.Join(prefix, "|"), content))
 }
 
 func NewClog(opts ...func(ctx context.Context) string) *Clog {
 	logger := &Clog{
 		ins: log.New(os.Stdout, "", log.Lmsgprefix|log.Ldate|log.Ltime|log.Lmicroseconds|log.Lshortfile),
+	}
+
+	if len(opts) == 0 {
+		opts = globalOpts
 	}
 
 	for _, opt := range opts {
@@ -58,4 +64,8 @@ func NewClog(opts ...func(ctx context.Context) string) *Clog {
 	}
 
 	return logger
+}
+
+func SetDefaultOpts(opts ...func(ctx context.Context) string) {
+	globalOpts = opts
 }
