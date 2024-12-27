@@ -95,6 +95,7 @@ func TestClog_Error(t *testing.T) {
 		t.Errorf("expected message %s, got %s", "error message", logOutput)
 	}
 }
+
 func TestNewClog(t *testing.T) {
 	// Test with no options
 	clog := NewClog()
@@ -138,5 +139,124 @@ func TestSetDefaultOpts(t *testing.T) {
 	clog = NewClog()
 	if len(clog.optional) != 0 {
 		t.Errorf("expected no global optional functions, got %d", len(clog.optional))
+	}
+}
+
+func TestInitDefaultLogger(t *testing.T) {
+	// Ensure defaultLogger is nil before initialization
+	defaultLogger = nil
+	initDefaultLogger()
+	if defaultLogger == nil {
+		t.Error("expected defaultLogger to be initialized")
+	}
+}
+
+func TestGlobalDebug(t *testing.T) {
+	SetDefaultOpts(func(ctx context.Context) string {
+		return ctx.Value(requestId{}).(string)
+	})
+
+	defaultLogger = nil
+	initDefaultLogger()
+	var buf bytes.Buffer
+	defaultLogger.ins.SetOutput(&buf)
+	defer defaultLogger.ins.SetOutput(nil)
+	SetDefaultOpts(func(ctx context.Context) string {
+		return ctx.Value(requestId{}).(string)
+	})
+
+	ctx := context.WithValue(context.Background(), requestId{}, "test-request-id")
+	Debug(ctx, "debug message")
+	logOutput := buf.String()
+
+	if !strings.Contains(logOutput, DEBUG) {
+		t.Errorf("expected log level %s, got %s", DEBUG, logOutput)
+	}
+	if !strings.Contains(logOutput, "test-request-id") {
+		t.Errorf("expected request ID %s, got %s", "test-request-id", logOutput)
+	}
+	if !strings.Contains(logOutput, "debug message") {
+		t.Errorf("expected message %s, got %s", "debug message", logOutput)
+	}
+}
+
+func TestGlobalInfo(t *testing.T) {
+	SetDefaultOpts(func(ctx context.Context) string {
+		return ctx.Value(requestId{}).(string)
+	})
+
+	defaultLogger = nil
+	initDefaultLogger()
+	var buf bytes.Buffer
+	defaultLogger.ins.SetOutput(&buf)
+	defer defaultLogger.ins.SetOutput(nil)
+	SetDefaultOpts(func(ctx context.Context) string {
+		return ctx.Value(requestId{}).(string)
+	})
+
+	ctx := context.WithValue(context.Background(), requestId{}, "test-request-id")
+	Info(ctx, "info message")
+	logOutput := buf.String()
+
+	if !strings.Contains(logOutput, INFO) {
+		t.Errorf("expected log level %s, got %s", INFO, logOutput)
+	}
+	if !strings.Contains(logOutput, "test-request-id") {
+		t.Errorf("expected request ID %s, got %s", "test-request-id", logOutput)
+	}
+	if !strings.Contains(logOutput, "info message") {
+		t.Errorf("expected message %s, got %s", "info message", logOutput)
+	}
+}
+
+func TestGlobalWarn(t *testing.T) {
+	SetDefaultOpts(func(ctx context.Context) string {
+		return ctx.Value(requestId{}).(string)
+	})
+
+	defaultLogger = nil
+	initDefaultLogger()
+	var buf bytes.Buffer
+	defaultLogger.ins.SetOutput(&buf)
+	defer defaultLogger.ins.SetOutput(nil)
+
+	ctx := context.WithValue(context.Background(), requestId{}, "test-request-id")
+	Warn(ctx, "warn message")
+	logOutput := buf.String()
+
+	if !strings.Contains(logOutput, WARN) {
+		t.Errorf("expected log level %s, got %s", WARN, logOutput)
+	}
+	if !strings.Contains(logOutput, "test-request-id") {
+		t.Errorf("expected request ID %s, got %s", "test-request-id", logOutput)
+	}
+	if !strings.Contains(logOutput, "warn message") {
+		t.Errorf("expected message %s, got %s", "warn message", logOutput)
+	}
+}
+
+func TestGlobalError(t *testing.T) {
+	SetDefaultOpts(func(ctx context.Context) string {
+		return ctx.Value(requestId{}).(string)
+	})
+
+	defaultLogger = nil
+	initDefaultLogger()
+	var buf bytes.Buffer
+	defaultLogger.ins.SetOutput(&buf)
+	defer defaultLogger.ins.SetOutput(nil)
+
+	ctx := context.WithValue(context.Background(), requestId{}, "test-request-id")
+	Error(ctx, "error message")
+	logOutput := buf.String()
+
+	if !strings.Contains(logOutput, ERROR) {
+		t.Errorf("expected log level %s, got %s", ERROR, logOutput)
+	}
+	if !strings.Contains(logOutput, "test-request-id") {
+		t.Errorf("expected request ID %s, got %s", "test-request-id", logOutput)
+	}
+	if !strings.Contains(logOutput, "error message") {
+		t.Errorf("expected message %s, got %s", "error message", logOutput)
 	}
 }
