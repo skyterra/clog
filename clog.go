@@ -55,7 +55,7 @@ func (cl *Clog) output(ctx context.Context, level string, format string, v ...an
 	}
 
 	content := fmt.Sprintf(format, v...)
-	cl.ins.Output(2, fmt.Sprintf("|%s|$ %s", strings.Join(prefix, "|"), content))
+	cl.ins.Output(3, fmt.Sprintf("|%s|$ %s", strings.Join(prefix, "|"), content))
 }
 
 // initDefaultLogger initializes the default logger if it is not already initialized.
